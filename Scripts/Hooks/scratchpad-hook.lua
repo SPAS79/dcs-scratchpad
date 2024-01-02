@@ -645,6 +645,7 @@ local function loadScratchpad()
               ti = ti + 1
               if ti >=4 then
                 if opts.precision ~= nil then
+                if opts.precision ~= nil then
                   t = string.sub(t,1,opts.precision)
                 end
               end
