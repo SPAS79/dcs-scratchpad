@@ -359,7 +359,6 @@ function loadInH60(start, waypoints)
   local device = 23
   local delay = 5
   local compliantName = ''
-  local WPnumb = 00
 
     local keys = {
     ['1']=			{LTR= nil,  KEY='3242'},-- AN/ASN-128B Btn 1
@@ -435,25 +434,12 @@ function loadInH60(start, waypoints)
   clicOn(device, 3236, delay, 0.05) -- set Display Sel to WP/TGT
   clicOn(device, 3235, delay, 0.04) -- set Mode Sel to LAT LON
 
---[[ 
-  for _,v in pairs(waypoints) do -- log the whole waypoint as read
-    for i,iv in pairs(v) do
-      log('   ' .. tostring(i) .. ": " .. tostring(iv))
-    end
-  end
- ]]
-
-
-
   for _,v in pairs(waypoints) do 
-    --log('   initial DISP SEL and MODE SEL presses')
-    --log('   v.name lenght is ' .. v.name:len() .. ' v.lat is ' .. v.lat .. ' v.lon is ' .. v.lon)
 
     clicOn(device, keys['INC'].KEY, delay)  -- Select the next waypoint on the AN/ASN 128B
-    --log('   initial INC press')
+
     -- WAYPOINT NAME - don't even know why I included this. 
     compliantName = v.name
-    --log('   v.name: '..v.name) -- log the full name as taken from the scratchpad
 
     if v.name then -- check if a name exists
       if(v.name:len() <= 13) then 
@@ -461,43 +447,29 @@ function loadInH60(start, waypoints)
       elseif v.name:len() > 13 then -- check if the name is more than 13 digits
         compliantName=v.name:sub(1, 13) --shortens it to 13
       end
-      --log('   v.name: '..v.name) -- log the full name as taken from the scratchpad
-      --log('   13char name: '..compliantName) -- log the shortened stirng (so it fits on the display, I have a feeling the -60 would accept it anyways)
       clicOn(device, keys['KYBD'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Name
-      --log('   clicked KYBD for name') --yeah please tell me wht you're doing
       for i = 1, compliantName:len() do --types the whole name, starting by iterating the string
         vv = compliantName:sub(i,i)   --iterates compliantName-s characters, one by one
-        --log('   vv '.. vv)   --tell me what are you reading?
         local k = string.upper(vv)  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        --log('   K ' .. k)   --shows the uppercase converted letter in the log
         Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
       end
     end
         
     clicOn(device, keys['KYBD'].KEY, delay) -- Select the next field on the AN/ASN 128B -- Should be Northing
-    --log('   clicked KYBD for no(r)thing')
-    --log('   v.lat: '..v.lat)  -- log the full lat as taken from the scratchpad
     for i = 1, v.lat:len() do --types the whole name, starting by iterating the string
       vv = v.lat:sub(i,i)   --iterates compliantName-s characters, one by one
-      --log('   vv_N '.. vv)  --tell me what are you reading?
         local k = tostring(string.upper(vv))  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        --log('   K_N ' .. k) --shows the uppercase converted letter in the log
         Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
     end
 
     clicOn(device, keys['KYBD'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Easting
-    --log('   clicked KYBD for easting') 
-    --log('   v.lon: '..v.lon)  -- log the full lon as taken from the scratchpad
     for i = 1, v.lon:len() do --types the whole name, starting by iterating the string
       vv = v.lon:sub(i,i)   --iterates compliantName-s characters, one by one
-      --log('   vv_N '.. vv)  --tell me what are you reading?
         local k = tostring(string.upper(vv))  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        log('   K_N ' .. k)   --shows the uppercase converted letter in the log
         Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
     end
 
     clicOn(device, keys['ENT'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Out to the next
-    --log('   clicked ENT for saving dear lyf')
   end 
   doLoadCoords = true
 end -- function
