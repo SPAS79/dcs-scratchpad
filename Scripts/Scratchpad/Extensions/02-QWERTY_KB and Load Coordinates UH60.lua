@@ -393,7 +393,7 @@ function loadInH60(start, waypoints)
     ['P']=			{LTR='3238', KEY='3248'}, --6 LTR L Keys
     ['S']=			{LTR='3238', KEY='3250'}, --7 LTR L Keys
     ['V']=			{LTR='3238', KEY='3251'}, --8 LTR L Keys
-    ['Z']=			{LTR='3238', KEY='3252'}, --9 LTR L Keys
+    ['Y']=			{LTR='3238', KEY='3252'}, --9 LTR L Keys
     
     ['B']=			{LTR='3239', KEY='3242'}, --1 LTR M keys
     ['E']=			{LTR='3239', KEY='3243'}, --2 LTR M keys
@@ -403,7 +403,8 @@ function loadInH60(start, waypoints)
     ['Q']=			{LTR='3239', KEY='3248'}, --6 LTR M keys
     ['T']=			{LTR='3239', KEY='3250'}, --7 LTR M keys
     ['W']=			{LTR='3239', KEY='3251'}, --8 LTR M keys
-    ['*']=			{LTR='3239', KEY='3252'}, --9 LTR M keys
+    ['Z']=			{LTR='3239', KEY='3252'}, --9 LTR M keys
+    ['#']=			{LTR='3239', KEY='3255'}, --0 LTR M keys
     
     ['C']=			{LTR='3240', KEY='3242'}, --1 LTR R Keys
     ['F']=			{LTR='3240', KEY='3243'}, --2 LTR R Keys
@@ -412,8 +413,8 @@ function loadInH60(start, waypoints)
     ['O']=			{LTR='3240', KEY='3247'}, --5 LTR R Keys
     ['R']=			{LTR='3240', KEY='3248'}, --6 LTR R Keys
     ['U']=			{LTR='3240', KEY='3250'}, --7 LTR R Keys
-    ['Y']=			{LTR='3240', KEY='3251'}, --8 LTR R Keys
-    ['#']=			{LTR='3240', KEY='3252'}, --9 LTR R Keys
+    ['X']=			{LTR='3240', KEY='3251'}, --8 LTR R Keys
+    ['*']=			{LTR='3240', KEY='3252'}, --9 LTR R Keys
     }
 
   local function Typevalue(keytopress)
