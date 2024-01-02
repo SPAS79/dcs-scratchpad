@@ -155,7 +155,7 @@ addCoordinateListener(
       insert = "@|#|"..formatCoord("DDM", true, lat, types.DDM) .. "|" .. formatCoord("DDM", false, lon, types.DDM).."|"..string.format("%.0f", alt*3.28084).."|"
 		elseif (ac == "UH-60L" or ac == "SH60B" or ac == "MH-60R") then -- Add new branches for UH-60L, SH60B, and MH-60R aircraft with DDM format
       insert = "@|#|"..formatCoord("DDM", true, lat, types.DDM) .. "|" .. formatCoord("DDM", false, lon, types.DDM).."||" -- Format the coordinates in DDM for these H-60 variations
-      log('H 60 Coord found are ' .. lat .. ' ' .. lon)
+      if sixtydebug == true then log('H 60 Coord found are ' .. lat .. ' ' .. lon) end
 	elseif ac == "F-16C_50"  then
       insert = "@|#|"..formatCoord("DDM", true, lat, types.DDM) .. "|" .. formatCoord("DDM", false, lon, types.DDM).."|"..string.format("%.0f", alt*3.28084).."|" 
     elseif ac == "M-2000C"  then
@@ -168,6 +168,11 @@ addCoordinateListener(
       insert = "@|#|"..formatCoord("MGRS", nil, mgrs, types.MGRS) .. "|" ..string.format("%.0f", alt*3.28084).."||"  
     elseif ac == "A-10C_2" or ac == "A-10C" then  
       insert = "@|#|"..formatCoord("DDM", true, lat, types.DDM) .. "|" .. formatCoord("DDM", false, lon, types.DDM).."|"..string.format("%.0f", alt*3.28084).."||"  
+    elseif ac == "Mirage-F1EE"  then
+       types.DDM = {precision = 1}
+      insert = "@|#|"..formatCoord("DDM", true, lat, types.DDM) .. "|" .. formatCoord("DDM", false, lon, types.DDM).."|"   
+    else
+      log('Adding coordinates for '..ac..' not possible') 
     end
     
     text:insertBelow(insert)
@@ -181,7 +186,7 @@ function insertCoords(text)
   local lc = 0
   local ac = DCS.getPlayerUnitType()
   local role = DCS.getUnitProperty(DCS.getPlayerUnit(),DCS.UNIT_ROLE)
-  log('insertCoords --> '..ac..' / '..role)     
+  if sixtydebug == true then log('insertCoords --> '..ac..' / '..role) end
   --local ExtraDelay = 0
   
   for LINE in string.gmatch(text:getText(),"([^\n]*)\n?") do    
@@ -252,6 +257,10 @@ function insertCoords(text)
           Waypoints[wpi] = {des = tokens[1], lat = tokens[2], lon = tokens[3], alt = tokens[4], name = ''}         
         end
       end      
+      if lineType == 'WP' and  #tokens == 3 and ac == 'Mirage-F1EE' then
+        wpi = wpi + 1
+        Waypoints[wpi] = {des = tokens[1], lat = tokens[2], lon = tokens[3]}
+      end      
 
     end -- if (string.sub(line,1,2) == "@<" or string.sub(line,1,2) == "@<") and L > 2 then
   end --   for line in string.gmatch(text:getText(),"([^\n]*)\n?") do
@@ -284,6 +293,8 @@ function loadCoordinates(StartWaypoint,Waypoints)--, ExtraDelay)
       loadInF18(StartWaypoint,Waypoints) 
     elseif ac == "M-2000C" then
       loadInM2000(StartWaypoint,Waypoints)
+    elseif ac == "Mirage-F1EE" then
+      loadInF1EE(StartWaypoint,Waypoints)      
     elseif ac == "F-16C_50" then
       loadInF16(StartWaypoint,Waypoints)
     elseif  ac == 'AH-64D_BLK_II' then
@@ -295,18 +306,7 @@ function loadCoordinates(StartWaypoint,Waypoints)--, ExtraDelay)
     end
   end -- function
 --==================================================================================
---[[ -- the new version takes into account delay in ms, not in frames
-function clicOn(device, code, delay, position )
-  delay = delay or 250
-  position = position or 1
-  -- Convert delay from milliseconds to frames
-  local delayInFrames = delay / (LoGetFrameTime() * 1000)
-  local datas ={device, code, delayInFrames, position} --this should make it so the delay is in milliseconds, not frames, to make the duration of a keypress more predictable
-  table.insert(inputBuffer,datas)
-  log('clicOn('..device..','.. code..','.. delay..','.. position..')')
-end -- function ]]
-
-function clicOn(device, code, delay, position ) --commented out until tested, will need to be removed once the new function is proven
+function clicOn(device, code, delay, position ) 
   delay = delay or 15 --delay here is expressed in frames
   position = position or 1
   local datas ={device, code, delay, position}
@@ -314,44 +314,8 @@ function clicOn(device, code, delay, position ) --commented out until tested, wi
   log('clicOn('..device..','.. code..','.. delay..','.. position..')')
 end -- function 
 --==================================================================================
---[[ function ProcessInputBuffer()  
-  for i = dataIndex, #inputBuffer do
-      if not doDepress then 
-          Export.GetDevice(inputBuffer[i][1]):performClickableAction(inputBuffer[i][2],inputBuffer[i][4])
-          if inputBuffer[i][3] > 0 then 
-              doDepress = true
-          else 
-              if inputBuffer[i][4] == 1 or inputBuffer[i][4] == -1 then 
-                  Export.GetDevice(inputBuffer[i][1]):performClickableAction(inputBuffer[i][2],0)
-              end
-              dataIndex = dataIndex+1
-          end
-      else
-          -- Compare counterFrame to the frame-based delay
-          if counterFrame >= tonumber(inputBuffer[i][3]) then 
-              dataIndex = dataIndex+1
-              counterFrame = 0
-              if inputBuffer[i][4] == 1 or inputBuffer[i][4] == -1 then 
-                  Export.GetDevice(inputBuffer[i][1]):performClickableAction(inputBuffer[i][2],0)
-              end
-              doDepress = false
-          else 
-              counterFrame = counterFrame+1
-          end
-      end
-
-      break
-  end
-
-  if dataIndex == #inputBuffer + 1 then
-      doLoadCoords = false
-      dataIndex=1
-      counterFrame =0
-      doDepress =false
-  end
-end ]]
-
 function ProcessInputBuffer()  
+--  log("running ProcessInputBuffer with "..#inputBuffer .." entries.")
   for i = dataIndex, #inputBuffer do
       if not doDepress then 
           Export.GetDevice(inputBuffer[i][1]):performClickableAction(inputBuffer[i][2],inputBuffer[i][4])
@@ -554,7 +518,7 @@ function loadInAV8B(start,waypoints)
     local isWP = true
     --                        0      1      2       3      4     5       6      7      8      9 
     local correspondance = {'3315','3302','3303','3304','3306','3307','3308','3310','3311','3312'}
-    local delay = 20
+    local delay = 10
     --[[
         L18 main menu
         L2 EHSD
@@ -1288,4 +1252,53 @@ function loadInApache(StartWaypoint,Waypoints,Seat)
 end -- function loadInApache
 
 --==================================================================================
+function loadInF1EE(start,waypoints)
+    local keys = {}
+    keys['1'] = 3698
+    keys['2'] = 3699 -- N
+    keys['3'] = 3700
+    keys['4'] = 3701 -- W
+    keys['5'] = 3702
+    keys['6'] = 3703 -- E
+    keys['7'] = 3704
+    keys['8'] = 3705 -- S
+    keys['9'] = 3706
+    keys['0'] = 3697
+    keys['INSER'] = 3711
+    keys['MODE'] = 3692
+    keys['PARAM'] = 3690
+    keys['WAYPOINT'] = 3694
+    
+    inputBuffer = {}
+    local delay = 10
+    log('>>>>>>>>>>>>> F1EE Load Start <<<<<<<<<<<<<<')
+    clicOn(1,keys['MODE'],delay, 0.1)
+    clicOn(1,keys['PARAM'],delay,0)    
+    for i, v in ipairs(waypoints) do  
+      for iii, digits in ipairs({v.lat,v.lon}) do
+        for ii = 1,string.len(digits) do 
+            local vv = string.sub(digits,ii,ii)
+            if vv == "N" then 
+              clicOn(1,keys['2'],delay)  
+            elseif vv == "E" then
+              clicOn(1,keys['6'],delay)  
+            elseif vv == "S" then
+              clicOn(1,keys['8'],delay)  
+            elseif vv == "W" then
+              clicOn(1,keys['4'],delay)  
+            elseif (vv == "."  or vv == '"' or vv == "°"  or vv == " " or vv == "'") then 
+            else
+              local position = tonumber(vv)
+              if position ~=nil then 
+                clicOn(1,keys[vv],delay)
+              end
+            end
+          end -- for ii
+        clicOn(1,keys['INSER'],delay)  
+      end -- for iii
+      clicOn(1,keys['WAYPOINT'],delay,0.111)    
+    end 
 
+    doLoadCoords = true
+end
+--==================================================================================
