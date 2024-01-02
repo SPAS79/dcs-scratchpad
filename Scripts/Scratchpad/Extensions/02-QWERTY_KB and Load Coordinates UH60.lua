@@ -280,7 +280,7 @@ function loadCoordinates(StartWaypoint,Waypoints)--, ExtraDelay)
       loadInAV8B(StartWaypoint,Waypoints)
     elseif (ac == "UH-60L" or ac == "SH60B" or ac == "MH-60R") then -- Add a conditional branch for H-60 variants
       log('loadCoordinates found H60')
-      loadInH60(Waypoints) -- Call the loadInH60 function for H-60 aircraft variants
+      loadInH60(StartWaypoint, Waypoints) -- Call the loadInH60 function for H-60 aircraft variants
     elseif ac == "F-15ESE"  then
         local device = 57
       if role == 'pilot' then
@@ -356,7 +356,7 @@ end -- function
 --================================================================================================================
 --  H-60 logic
 --================================================================================================================
-function loadInH60(waypoints)
+function loadInH60(start, waypoints)
   --local status, err = pcall(function()
     inputbuffer = {}
     if sixtydebug == true then log('called LoadinH60') end
