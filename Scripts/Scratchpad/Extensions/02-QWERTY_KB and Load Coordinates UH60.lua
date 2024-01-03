@@ -432,6 +432,7 @@ function loadInH60(start, waypoints)
     end
   end
 
+  clicOn(device, 3236, delay, 0.04) -- set Display Sel to DST/BRG (reset)
   clicOn(device, 3236, delay, 0.05) -- set Display Sel to WP/TGT
   clicOn(device, 3235, delay, 0.04) -- set Mode Sel to LAT LON
 
@@ -439,39 +440,31 @@ function loadInH60(start, waypoints)
 
     clicOn(device, keys['INC'].KEY, delay)  -- Select the next waypoint on the AN/ASN 128B
 
-    -- WAYPOINT NAME - don't even know why I included this. 
-    compliantName = v.name
-
-    if v.name then -- check if a name exists
+    if v.name or v.name == '' then -- check if a name exists OR not... 
       if(v.name:len() <= 13) then 
-        compliantName=v.name
+        v.name=v.name
       elseif v.name:len() > 13 then -- check if the name is more than 13 digits
-        compliantName=v.name:sub(1, 13) --shortens it to 13
+        v.name=v.name:sub(1, 13) --shortens it to 13
       end
-      clicOn(device, keys['KYBD'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Name
-      for i = 1, compliantName:len() do --types the whole name, starting by iterating the string
-        vv = compliantName:sub(i,i)   --iterates compliantName-s characters, one by one
-        local k = string.upper(vv)  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
-      end
-    end
-        
-    clicOn(device, keys['KYBD'].KEY, delay) -- Select the next field on the AN/ASN 128B -- Should be Northing
-    for i = 1, v.lat:len() do --types the whole name, starting by iterating the string
-      vv = v.lat:sub(i,i)   --iterates compliantName-s characters, one by one
-        local k = tostring(string.upper(vv))  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
     end
 
-    clicOn(device, keys['KYBD'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Easting
-    for i = 1, v.lon:len() do --types the whole name, starting by iterating the string
-      vv = v.lon:sub(i,i)   --iterates compliantName-s characters, one by one
-        local k = tostring(string.upper(vv))  --converts what has been read to uppercase, otherwise it won't have a correspondence in the keys{} table
-        Typevalue(k)  --calls the Typevalue function, which will press the corresponding key on the AN/ASN 128B
+    local function typeValueOnANASN128B(value)
+      clicOn(device, keys['KYBD'].KEY, delay)  -- Select the next field on the AN/ASN 128B
+      for i = 1, value:len() do
+        local char = value:sub(i, i)
+        local upperChar = string.upper(char)
+        Typevalue(tostring(upperChar))
+      end
     end
+
+    typeValueOnANASN128B(v.name) -- type the name on the AN/ASN 128B
+    typeValueOnANASN128B(v.lat) -- type the latitude on the AN/ASN 128B
+    typeValueOnANASN128B(v.lon) -- type the longitude on the AN/ASN 128B
+
 
     clicOn(device, keys['ENT'].KEY, delay)  -- Select the next field on the AN/ASN 128B -- Should be Out to the next
   end 
+  clicOn(device, 3236, delay, 0.04) -- set Display Sel to DST/BRG (nav)
   doLoadCoords = true
 end -- function
 --================================================================================================================
