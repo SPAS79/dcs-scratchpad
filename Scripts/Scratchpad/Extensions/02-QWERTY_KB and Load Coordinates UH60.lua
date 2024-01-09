@@ -1153,10 +1153,13 @@ for _,v in pairs(Waypoints) do
     ident = 'TU'  
     identType = 'H'
   end
-   if string.len(v.des) == 2  then
-    ident = string.upper(v.des)
+  if string.len(v.des) == 2  then
+    ident = string.sub(string.upper(v.des),2,2)
+    identType = 'T'
+  else
+    ident = 'WP'
     identType = 'W'
-  end   
+  end
   if string.len(v.des) >= 3 then
     ident = string.sub(string.upper(v.des),2,3)
     identType = string.sub(string.upper(v.des),1,1)
